@@ -31,7 +31,7 @@ You can learn everything about the machine in the source code of QEMU
 RISC-V VIRT (such as memory mapping addresses).
 
 ### Get QEMU Running
-> qemu-system-riscv64 -M virt -smp 4 -m 128M -nographic -serial mon:stdio -bios none -kernel kernel.elf
+qemu-system-riscv64 -M virt -smp 4 -m 128M -nographic -serial mon:stdio -bios none -kernel kernel.elf
 **Eexecutable and Linkable Format (ELF)** is a common standard file format for
 executable files and the standard binary file format for Unix and Unix-like
 systems on x86 processors.
@@ -50,3 +50,7 @@ kernel.lds
 **ld** is the linker of object files in Unix-like systems that is used at the
 last step of compilation.
 A linker script explicitly control over the link process.
+
+## Assembler Source Code
+root.S
+
