@@ -27,30 +27,46 @@ registers
 
 ## Hardware (Machine)
 qemu riscv virt
-You can learn everything about the machine in the source code of QEMU
-RISC-V VIRT (such as memory mapping addresses).
+You can learn everything about the machine in the source code of QEMU RISC-V VIRT (such as memory mapping addresses).
 
-### Get QEMU Running
-qemu-system-riscv64 -M virt -smp 4 -m 128M -nographic -serial mon:stdio -bios none -kernel kernel.elf
-**Eexecutable and Linkable Format (ELF)** is a common standard file format for
+## Get QEMU Running
+Once QEMU RISC-V 64 VIRT is installed, we'll emulate a RISC-V 64 environment
+using the following command.
+`qemu-system-riscv64 -M virt -smp 4 -m 128M -nographic -serial mon:stdio -bios none -kernel kernel.elf`
+We'll explain the parameters a little bit later.
+In order to run the code, we need the kernel `kernel.elf` written by us. 😁
+**Executable and Linkable Format (ELF)** is a common standard file format for
 executable files and the standard binary file format for Unix and Unix-like
 systems on x86 processors.
 
-####parameters
+## Compiling Bootloader
+In order to compile this RISC-V assembly code into an object file, you need a RISC-V toolchain installed (homebrew available).
+- Assembly Source Code (assembler)
+    - `boot.S`
+- Compilation (assembler > RISC-V 64 machine code)
+    - `riscv64-unknown-elf-as boot.S -o boot.o`
+- Linker (configuration on how to layout objects and memories so that QEMU can
+    execute properly)
+    - kernel.lds
+- Linking 
+    - `riscv64-unknown-elf-ld -T kernel.lds boot.o -o kernel.elf`
+
+## Get QEMU Running
+`qemu-system-riscv64 -M virt -smp 4 -m 128M -nographic -serial mon:stdio -bios none -kernel kernel.elf`
+
+### parameters
 - cpu architecture (risc-v 64 bit)
 - virtual machine / no
 - number of cores
 - memory (RAM)
 - no/yes graphic
 - serial interface
-- kernel (that we're going to build)
+- kernel
 
-## Linker Script
-kernel.lds
-**ld** is the linker of object files in Unix-like systems that is used at the
-last step of compilation.
-A linker script explicitly control over the link process.
-
-## Assembler Source Code
-root.S
-
+We set up four cores here.
+In `boot.S`, we set all four hardware threads
+to start at the same time
+`.global _start`
+and go wait for interrupts
+`_start:
+    wfi`
