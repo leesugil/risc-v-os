@@ -47,7 +47,7 @@ In order to compile this RISC-V assembly code into an object file, you need a RI
     - `riscv64-unknown-elf-as boot.S -o boot.o`
 - Linker (configuration on how to layout objects and memories so that QEMU can
     execute properly)
-    - kernel.lds
+    - `kernel.lds`
 - Linking 
     - `riscv64-unknown-elf-ld -T kernel.lds boot.o -o kernel.elf`
 
@@ -63,10 +63,46 @@ In order to compile this RISC-V assembly code into an object file, you need a RI
 - serial interface
 - kernel
 
+### Boot with no instructions
+
 We set up four cores here.
-In `boot.S`, we set all four hardware threads
+In `boot.S`, we set all four hardware threads (t0, t1, t2, t3)
 to start at the same time
 `.global _start`
 and go wait for interrupts
-`_start:
-    wfi`
+```
+_start:
+    wfi
+```
+
+### Controlling threads (cores? harts?)
+
+Read one of the system registers
+Hart ID Register `mhartid`
+contains the integer ID of the hardware thread running the code.
+
+CSR Read Asseembly Instruction
+Control and Status Register (CSR)
+to read the mhartid register and store it in the temporary register (`t0`):
+`scrr t0, mhartid`
+Branch on Not Equal to Zero
+`bnez t0, _wait`
+If the mhartid stored in `t0` is not 0, go to the `_wait` section.
+```
+_wait
+    wfi
+```
+Otherwise, let's print something.
+```
+j _write_uart
+wfi
+```
+where the `_write_uart` section is declared to be
+```
+_write_uart:
+    li t1, 0x61 # in variable t1, store 0x61 which is `a` in ASCII
+    li t2, 0x10000000   # in variable t2, store the UART address used in
+    QEMU emulation
+    sb t1, (t2) # store the value in t1 to the memory address t2.
+```
+
