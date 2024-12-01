@@ -77,6 +77,14 @@ _start:
 
 ### Controlling threads (cores? harts?)
 
+Since we set `.global _start`, all four hardware threads go to `_start`.
+It's like `for each, run _start`.
+For each thread, we can read out their Hart ID from the system registers.
+And by requirement, every RISC-V system must contain a unique thread with Hart
+ID 0.
+So we can put a simple `if` condition to write a single-core instruction like
+`read hartid. if 0, do this. otherwise, wfi.`
+
 Read one of the system registers
 Hart ID Register `mhartid`
 contains the integer ID of the hardware thread running the code.
@@ -100,9 +108,11 @@ wfi
 where the `_write_uart` section is declared to be
 ```
 _write_uart:
-    li t1, 0x61 # in variable t1, store 0x61 which is `a` in ASCII
+    li t1, 0x41 # in variable t1, store 0x41 which is `A` in ASCII
     li t2, 0x10000000   # in variable t2, store the UART address used in
     QEMU emulation
     sb t1, (t2) # store the value in t1 to the memory address t2.
 ```
+This is the minimum viable product to get something out of our bootloader.
+
 
