@@ -11,7 +11,9 @@ _start:
 	csrr t0, mhartid
 	bnez t0, _wait
 	call _setup_uart
-	la a0, welcome	# Load absolute address. 
+	la a0, welcome	# Load absolute address.
+	call _write_uart
+	la a0, welcome
 	call _write_uart
 	wfi
 
